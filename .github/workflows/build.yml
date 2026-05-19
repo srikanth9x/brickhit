@@ -1,0 +1,60 @@
+name: Build BrickHit APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          df -h
+          
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build love package
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zip
+          zip -9 -r game.love . \
+            --exclude "*.git*" \
+            --exclude "*.github*" \
+            --exclude "screenshots/*" \
+            --exclude "res/*" \
+            --exclude "README.md" \
+            --exclude "LICENSE"
+
+      - name: Build Android APK
+        uses: love-actions/love-actions-android@v2
+        with:
+          app-name: "BrickHit"
+          bundle-id: "com.srikanth9x.brickhit"
+          love-ref: "11.5"
+          love-package: "./game.love"
+          resource-path: "./res"
+          icon-specifier: "@mipmap/app"
+          product-name: "brickhit"
+          version-string: "1.0.0"
+          version-code: 1
+          output-folder: "./output"
+          keystore-alias: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+          keystore-base64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          keystore-key-password: ${{ secrets.ANDROID_KEYSTORE_KEYPASSWORD }}
+          keystore-store-password: ${{ secrets.ANDROID_KEYSTORE_STOREPASSWORD }}
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: brickhit-apk
+          path: ./output/*.apk
