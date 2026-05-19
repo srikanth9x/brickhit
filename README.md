@@ -61,7 +61,7 @@ touch input on Android.
 
 ## Download
 
-Download the APK from the [Releases](../../releases) page.
+Download the APK from the [Releases](https://github.com/srikanth9x/brickhit/releases/latest) page.
 
 ## Credits
 
